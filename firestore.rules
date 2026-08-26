@@ -12,7 +12,15 @@ service cloud.firestore {
     match /ars/{id} {
       allow create: if signedIn() && request.resource.data.criadoPor == request.auth.uid && request.resource.data.status == 'aguardando';
       allow read: if signedIn() && (admin() || resource.data.criadoPor == request.auth.uid);
-      allow update: if admin();
+      allow update: if admin() || (
+        signedIn() &&
+        resource.data.criadoPor == request.auth.uid &&
+        resource.data.status == 'aguardando' &&
+        request.resource.data.status == 'aguardando' &&
+        request.resource.data.criadoPor == resource.data.criadoPor
+      );
+      allow delete: if signedIn() && resource.data.status == 'aguardando' &&
+        (admin() || resource.data.criadoPor == request.auth.uid);
     }
   }
 }
