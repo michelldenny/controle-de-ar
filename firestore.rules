@@ -26,6 +26,15 @@ service cloud.firestore {
         request.resource.data.diff(resource.data).affectedKeys().hasOnly([
           'status', 'recebidoEm', 'recebidoPor', 'recebidoPorNome'
         ])
+      ) || (
+        signedIn() &&
+        resource.data.criadoPor == request.auth.uid &&
+        resource.data.status in ['recebido', 'entregue', 'devolvido'] &&
+        request.resource.data.status in ['entregue', 'devolvido'] &&
+        request.resource.data.criadoPor == resource.data.criadoPor &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          'status', 'resultadoEm', 'resultadoPor', 'resultadoPorNome'
+        ])
       );
       allow delete: if signedIn() &&
         resource.data.status == 'aguardando' &&
